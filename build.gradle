@@ -1,0 +1,122 @@
+if (project.hasProperty('overrideBuildEnvironment')) {
+  //The property is automatically passed to the Gradle build when the project is built at LinkedIn
+  //The property contains the file path to a script plugin that 'adapts' this OS project to LinkedIn
+  //In order to adapt the project, we need to apply this script plugin:
+  apply from: project.overrideBuildEnvironment
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.13'
+}
+
+
+
+buildscript {
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
+}
+
+
+
+buildscript {
+  repositories {
+    mavenCentral()
+    mavenLocal()
+  }
+}
+
+ext {
+  libs = [:]
+}
+
+libs += [
+    apache: "org.apache.commons:commons-lang3:3.4",
+    apacheCommonsIo: "commons-io:commons-io:2.4",
+    bcpkix: "org.bouncycastle:bcpkix-jdk15on:1.51",
+    bcprov: "org.bouncycastle:bcprov-jdk15on:1.51",
+    commonsCli: "commons-cli:commons-cli:1.2",
+    easymock: "org.easymock:easymock:3.3",
+    googleGuava: "com.google.guava:guava:18.0",
+    httpclient: "org.apache.httpcomponents:httpclient:4.3.1",
+    jacksonCodec: "com.fasterxml.jackson.core:jackson-core:2.5.3",
+    log4j: "log4j:log4j:1.2.17",
+    netty: "io.netty:netty-all:4.0.27.Final",
+    testng: "org.testng:testng:6.8.8",
+    restliServer: "com.linkedin.pegasus:restli-server:6.0.12",
+    restliNettyStandalone: "com.linkedin.pegasus:restli-netty-standalone:6.0.12"
+]
+
+allprojects {
+  apply plugin: "java"
+  apply plugin: 'idea'
+
+  dependencies {
+    compile libs.apache
+    compile libs.apacheCommonsIo
+    compile libs.bcpkix
+    compile libs.bcprov
+    compile libs.commonsCli
+    compile libs.easymock
+    compile libs.googleGuava
+    compile libs.httpclient
+    compile libs.jacksonCodec
+    compile libs.log4j
+    compile libs.netty
+    compile libs.testng
+  }
+
+  repositories {
+    mavenCentral()
+  }
+}
+
+project(':flashback-test-util') {
+  println "Building project 'test-util'"
+
+  dependencies {
+    compile project(':flashback-core-impl')
+    compile project(':flashback-smartproxy')
+    compile project(':flashback-netty')
+  }
+}
+
+project(':flashback-smartproxy') {
+  println "Building project 'smartproxy'"
+
+  dependencies {
+    compile project(':flashback-core-impl')
+    compile project(':flashback-netty')
+    compile project(':mitm')
+  }
+}
+
+project(':flashback-netty') {
+  println "Building project 'netty'"
+
+  dependencies {
+    compile project(':flashback-core-impl')
+  }
+}
+
+project(':flashback-admin') {
+  apply plugin: 'java'
+
+  dependencies {
+    compile libs.restliServer
+    compile libs.restliNettyStandalone
+    compile project(':flashback-smartproxy')
+  }
+
+  task startAdminServer(type: JavaExec) {
+    main = 'com.linkedin.restli.server.NettyStandaloneLauncher'
+    if (project.hasProperty('Args')) {
+      args(Args.split())
+    }
+    args += ['-packages', 'com.linkedin.flashback']
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+  }
+}
+

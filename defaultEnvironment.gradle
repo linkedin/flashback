@@ -1,0 +1,9 @@
+//Build logic specific to OS environment, outside LinkedIn
+//OS builds will use this build logic
+logger.lifecycle("Configuring using default environment (defaultEnvironment.gradle)...")
+ 
+subprojects { 
+  repositories {
+    mavenCentral()
+  }
+}
