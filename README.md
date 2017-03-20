@@ -143,7 +143,7 @@ curl "http://localhost:1234/admin?action=startFlashback" --data '{
 One way to verify that the response is from the scene, not the external source, is to disable your internet connectivity temporarily when you go through steps 1 through 6. Another way is to modify your scene file and see if the response is the same as what you have in the file.
 
 ### Resources
-* [Background] (https://github.com/linkedin/flashback/wiki/Background)
+* [Background](https://github.com/linkedin/flashback/wiki/Background)
 * [How to Record and Replay an HTTP Transaction](https://github.com/linkedin/flashback/wiki/How-to-Record-and-Replay-HTTP-Transaction)
 * [How to Record and Replay an HTTPS Transaction](https://github.com/linkedin/flashback/wiki/How-to-Record-and-Replay-an-HTTPS-Transaction)
 * [Supporting dynamic changes](https://github.com/linkedin/flashback/wiki/Supporting-dynamic-changes)
