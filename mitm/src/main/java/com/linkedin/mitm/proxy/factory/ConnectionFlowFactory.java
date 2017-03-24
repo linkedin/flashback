@@ -56,8 +56,8 @@ public class ConnectionFlowFactory {
     try {
       PKC12KeyStoreReadWriter pkc12KeyStoreReadWriter = new PKC12KeyStoreReadWriter();
       KeyStore issuerKeyStore = pkc12KeyStoreReadWriter.load(rootCertificateInputStream, rootCertificatePassphrase);
-      SSLContext clientSslContext =
-          SSLContextGenerator.createClientContext(issuerKeyStore, certificateAuthority.getPassPhrase());
+      SSLContext serverSslContext =
+          SSLContextGenerator.createServerContext(issuerKeyStore, certificateAuthority.getPassPhrase());
       CertificateValidPeriod defaultPeriod = new CertificateValidPeriod();
       CertificateKeyStoreFactory certificateKeyStoreFactory =
           new CertificateKeyStoreFactory(new RSASha1KeyPairFactory(1024),
@@ -65,7 +65,7 @@ public class ConnectionFlowFactory {
       List<ConnectionFlowStep> connectionFlowSteps = new ArrayList<>();
       connectionFlowSteps.add(new StopReadingFromClient());
       connectionFlowSteps.add(new EstablishTCPConnectionToServer());
-      connectionFlowSteps.add(new HandshakeWithServer(clientSslContext));
+      connectionFlowSteps.add(new HandshakeWithServer(serverSslContext));
       connectionFlowSteps.add(new AcceptTCPConnectionFromClient());
       connectionFlowSteps.add(new ResumeReadingFromClient());
       connectionFlowSteps.add(new HandshakeWithClient(certificateKeyStoreFactory, certificateAuthority));

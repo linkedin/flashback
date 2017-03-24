@@ -34,8 +34,6 @@ public class SSLContextGenerator {
    * */
   public static SSLContext createClientContext(KeyStore keyStore, char[] passphrase)
       throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
-    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TRUST_MANAGER_TYPE);
-    trustManagerFactory.init(keyStore);
     String keyManAlg = KeyManagerFactory.getDefaultAlgorithm();
     KeyManagerFactory kmf = KeyManagerFactory.getInstance(keyManAlg);
     kmf.init(keyStore, passphrase);
@@ -48,10 +46,10 @@ public class SSLContextGenerator {
    * Create server side SSLContext {@link javax.net.ssl.SSLContext}
    *
    * */
-  public static SSLContext createServerContext(KeyStore keyStore, String passphrase)
+  public static SSLContext createServerContext(KeyStore keyStore, char[] passphrase)
       throws KeyManagementException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException {
     KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KEY_MANAGER_TYPE);
-    keyManagerFactory.init(keyStore, passphrase.toCharArray());
+    keyManagerFactory.init(keyStore, passphrase);
     return create(keyManagerFactory.getKeyManagers(), null, RandomNumberGenerator.getInstance().getSecureRandom());
   }
 
