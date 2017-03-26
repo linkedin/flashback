@@ -43,14 +43,12 @@ public class SSLContextGenerator {
   }
 
   /**
-   * Create server side SSLContext {@link javax.net.ssl.SSLContext}
+   * Create default server side SSLContext {@link javax.net.ssl.SSLContext}
    *
    * */
-  public static SSLContext createServerContext(KeyStore keyStore, char[] passphrase)
+  public static SSLContext createDefaultServerContext()
       throws KeyManagementException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException {
-    KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KEY_MANAGER_TYPE);
-    keyManagerFactory.init(keyStore, passphrase);
-    return create(keyManagerFactory.getKeyManagers(), null, RandomNumberGenerator.getInstance().getSecureRandom());
+    return create(null, null, RandomNumberGenerator.getInstance().getSecureRandom());
   }
 
   private static SSLContext create(KeyManager[] keyManagers, TrustManager[] trustManagers, SecureRandom secureRandom)
