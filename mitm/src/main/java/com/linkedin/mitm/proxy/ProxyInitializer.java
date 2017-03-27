@@ -8,6 +8,7 @@ package com.linkedin.mitm.proxy;
 import com.linkedin.mitm.proxy.channel.ChannelMediator;
 import com.linkedin.mitm.proxy.channel.ClientChannelHandler;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
@@ -28,10 +29,18 @@ public class ProxyInitializer extends ChannelInitializer<SocketChannel> {
 
   @Override
   public void initChannel(SocketChannel socketChannel) {
-    socketChannel.pipeline().addLast("decoder", new HttpRequestDecoder()).addLast("encoder", new HttpResponseEncoder())
-        .addLast("idle", new IdleStateHandler(0, 0, _proxyServer.getClientConnectionIdleTimeout())).addLast("handler",
-        new ClientChannelHandler(new ChannelMediator(socketChannel, _proxyServer.getProxyModeControllerFactory(),
-            _proxyServer.getDownstreamWorkerGroup(), _proxyServer.getServerConnectionIdleTimeout(),
-            _proxyServer.getAllChannels()), _proxyServer.getConnectionFlowRegistry()));
+    ChannelPipeline channelPipeline = socketChannel.pipeline();
+    channelPipeline.addLast("decoder", new HttpRequestDecoder());
+    channelPipeline.addLast("encoder", new HttpResponseEncoder());
+    channelPipeline.addLast("idle", new IdleStateHandler(0, 0, _proxyServer.getClientConnectionIdleTimeout()));
+    ChannelMediator channelMediator = new ChannelMediator(socketChannel,
+        _proxyServer.getProxyModeControllerFactory(),
+        _proxyServer.getDownstreamWorkerGroup(),
+        _proxyServer.getServerConnectionIdleTimeout(),
+        _proxyServer.getAllChannels());
+    ClientChannelHandler clientChannelHandler =
+        new ClientChannelHandler(channelMediator, _proxyServer.getConnectionFlowRegistry());
+
+    channelPipeline.addLast("handler", clientChannelHandler);
   }
 }
