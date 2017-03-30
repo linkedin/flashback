@@ -147,6 +147,7 @@ One way to verify that the response is from the scene, not the external source, 
 * [How to Record and Replay an HTTP Transaction](https://github.com/linkedin/flashback/wiki/How-to-Record-and-Replay-HTTP-Transaction)
 * [How to Record and Replay an HTTPS Transaction](https://github.com/linkedin/flashback/wiki/How-to-Record-and-Replay-an-HTTPS-Transaction)
 * [Supporting dynamic changes](https://github.com/linkedin/flashback/wiki/Supporting-dynamic-changes)
+* [How to use Flashback to test non-java service](https://github.com/linkedin/flashback/wiki/How-to-use-Flashback-to-test-non-java-service)
 
 
 ## Use cases 
