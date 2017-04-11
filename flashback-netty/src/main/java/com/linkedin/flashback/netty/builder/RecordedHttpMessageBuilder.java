@@ -22,7 +22,9 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpMessage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -32,6 +34,7 @@ import java.util.Map;
  * @author shfeng
  */
 public abstract class RecordedHttpMessageBuilder {
+  public static final String SET_COOKIE = "Set-Cookie";
   protected HttpMessage _nettyHttpMessage;
   private final Multimap<String, String> _headers = LinkedHashMultimap.create();
   protected final CompositeByteBuf _bodyByteBuf = Unpooled.compositeBuffer();
@@ -92,6 +95,17 @@ public abstract class RecordedHttpMessageBuilder {
    * @return values that might contain multiple values joined with ','
    * */
   protected String getHeader(String name) {
+    // Set-Cookie headers might contains something like "Expires=Thu, 23-Mar-2017 18:01:20 GMT; Path=/"
+    // It's hard to find special character to split them properly. However, we don't want encode other
+    // headers becaus we don't want lose readability in the flashback.scene so let's handle Set-Cookie header
+    // differently
+    if (SET_COOKIE.equals(name)) {
+      return Joiner.on(", ")
+          .join(_headers.get(name)
+              .stream()
+              .map(p -> Base64.getEncoder().encodeToString(p.getBytes()))
+              .collect(Collectors.toList()));
+    }
     return Joiner.on(", ").join(_headers.get(name));
   }
 

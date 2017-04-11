@@ -64,11 +64,16 @@ allprojects {
     compile libs.jacksonCodec
     compile libs.log4j
     compile libs.netty
-    compile libs.testng
+    testCompile libs.testng
+
   }
 
   repositories {
     mavenCentral()
+  }
+
+  test {
+    useTestNG()
   }
 }
 
@@ -79,6 +84,7 @@ project(':flashback-test-util') {
     compile project(':flashback-core-impl')
     compile project(':flashback-smartproxy')
     compile project(':flashback-netty')
+    compile libs.testng
   }
 }
 
