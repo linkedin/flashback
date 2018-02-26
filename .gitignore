@@ -2,4 +2,4 @@
 build/
 logs/
 .idea/
-
+*/out/*

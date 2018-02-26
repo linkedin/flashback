@@ -42,20 +42,8 @@ public final class NettyHttpResponseMapper {
     } else {
       fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, status);
     }
-    for (Map.Entry<String, String> header : recordedHttpResponse.getHeaders().entrySet()) {
-      // Set-Cookie headers might contains something like "Expires=Thu, 23-Mar-2017 18:01:20 GMT; Path=/"
-      // It's hard to find special character to split them properly. However, we don't want encode other
-      // headers becaus we don't want lose readability in the flashback.scene so let's handle Set-Cookie header
-      // differently
-      if (SET_COOKIE.equals(header.getKey())) {
-        fullHttpResponse.headers()
-            .set(header.getKey(),
-                StreamSupport.stream(Splitter.onPattern(",\\s*").split(header.getValue()).spliterator(), false)
-                    .map(p -> new String(Base64.getDecoder().decode(p.getBytes())))
-                    .collect(Collectors.toList()));
-      } else {
-        fullHttpResponse.headers().set(header.getKey(), Splitter.onPattern(",\\s*").split(header.getValue()));
-      }
+    for (Map.Entry<String, String> header : recordedHttpResponse.getHeaders().entries()) {
+      fullHttpResponse.headers().add(header.getKey(), header.getValue());
     }
     return fullHttpResponse;
   }

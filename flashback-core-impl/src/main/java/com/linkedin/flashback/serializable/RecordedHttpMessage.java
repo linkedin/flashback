@@ -6,13 +6,13 @@
 package com.linkedin.flashback.serializable;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
+
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 
@@ -27,10 +27,10 @@ public abstract class RecordedHttpMessage {
   private static final Logger logger = Logger.getLogger("RecordedHttpMessage");
   private static final String DEFAULT_CONTENT_TYPE = MediaType.OCTET_STREAM.toString();
 
-  private Map<String, String> _headers = Collections.EMPTY_MAP;
+  private Multimap<String, String> _headers = LinkedHashMultimap.create();
   private RecordedHttpBody _httpBody;
 
-  public RecordedHttpMessage(Map<String, String> headers, RecordedHttpBody httpBody) {
+  public RecordedHttpMessage(Multimap<String, String> headers, RecordedHttpBody httpBody) {
     if (headers != null) {
       _headers = headers;
     }
@@ -40,7 +40,7 @@ public abstract class RecordedHttpMessage {
     if (_headers.containsKey(HttpHeaders.CONTENT_LENGTH)) {
       try {
         int contentLength = _httpBody.getContent(getCharset()).length;
-        _headers = new HashMap<>(_headers);
+        _headers = LinkedHashMultimap.create(_headers);
         _headers.put(HttpHeaders.CONTENT_LENGTH, Integer.toString(contentLength));
       } catch (IOException e) {
         logger.error("Caught exception " + e + " while updating Content-Length header");
@@ -56,25 +56,27 @@ public abstract class RecordedHttpMessage {
     return _httpBody != null;
   }
 
-  public Map<String, String> getHeaders() {
+  public Multimap<String, String> getHeaders() {
     return _headers;
   }
 
   public String getCharset() {
-    String header = _headers.get(HttpHeaders.CONTENT_TYPE);
-    if (Strings.isNullOrEmpty(header)) {
+    // Content_Type cannot have multiple, commas-separated values, so this is safe.
+    Iterator<String> header = _headers.get(HttpHeaders.CONTENT_TYPE).iterator();
+    if (!header.hasNext()) {
       return DEFAULT_CHARSET;
     } else {
-      return MediaType.parse(header).charset().or(Charsets.UTF_8).toString();
+      return MediaType.parse(header.next()).charset().or(Charsets.UTF_8).toString();
     }
   }
 
   public String getContentType() {
-    String header = _headers.get(HttpHeaders.CONTENT_TYPE);
-    if (Strings.isNullOrEmpty(header)) {
+    // Content_Type cannot have multiple, commas-separated values, so this is safe.
+    Iterator<String> header = _headers.get(HttpHeaders.CONTENT_TYPE).iterator();
+    if (!header.hasNext()) {
       return DEFAULT_CONTENT_TYPE;
     } else {
-      return MediaType.parse(header).withoutParameters().toString();
+      return MediaType.parse(header.next()).withoutParameters().toString();
     }
   }
 }

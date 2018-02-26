@@ -8,6 +8,7 @@ package com.linkedin.flashback.serialization;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.google.common.collect.Multimap;
 import com.linkedin.flashback.scene.Scene;
 import com.linkedin.flashback.serializable.RecordedByteHttpBody;
 import com.linkedin.flashback.serializable.RecordedEncodedHttpBody;
@@ -98,10 +99,10 @@ public class SceneSerializer {
     }
   }
 
-  private void writeHttpHeaders(Map<String, String> headers)
+  private void writeHttpHeaders(Multimap<String, String> headers)
       throws IOException {
     _jsonGenerator.writeObjectFieldStart(SceneSerializationConstant.SCENE_TAG_HTTPHEADERS);
-    for (Map.Entry<String, String> entry : headers.entrySet()) {
+    for (Map.Entry<String, String> entry : headers.entries()) {
       _jsonGenerator.writeStringField(entry.getKey(), entry.getValue());
     }
     _jsonGenerator.writeEndObject();

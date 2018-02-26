@@ -5,6 +5,8 @@
 
 package com.linkedin.flashback.netty.mapper;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.linkedin.flashback.serializable.RecordedHttpResponse;
 import com.linkedin.flashback.serializable.RecordedStringHttpBody;
 import io.netty.handler.codec.http.FullHttpResponse;
@@ -24,7 +26,7 @@ public class NettyHttpResponseMapperTest {
   @Test
   public void testFromWithoutBody()
       throws Exception {
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("key2", "value2,value3,value4");
     int status = 200;
@@ -33,16 +35,14 @@ public class NettyHttpResponseMapperTest {
     Assert.assertEquals(fullHttpResponse.getStatus().code(), status);
     Assert.assertEquals(fullHttpResponse.headers().get("key1"), "value1");
     List<String> headrValues = fullHttpResponse.headers().getAll("key2");
-    Assert.assertEquals(headrValues.size(), 3);
-    Assert.assertTrue(headrValues.contains("value2"));
-    Assert.assertTrue(headrValues.contains("value3"));
-    Assert.assertTrue(headrValues.contains("value4"));
+    Assert.assertEquals(headrValues.size(), 1);
+    Assert.assertTrue(headrValues.contains("value2,value3,value4"));
   }
 
   @Test
   public void testFromWithBody()
       throws Exception {
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("key2", "value2,value3,value4");
     int status = 200;
@@ -53,16 +53,14 @@ public class NettyHttpResponseMapperTest {
     Assert.assertEquals(fullHttpResponse.getStatus().code(), status);
     Assert.assertEquals(fullHttpResponse.headers().get("key1"), "value1");
     List<String> headrValues = fullHttpResponse.headers().getAll("key2");
-    Assert.assertEquals(headrValues.size(), 3);
-    Assert.assertTrue(headrValues.contains("value2"));
-    Assert.assertTrue(headrValues.contains("value3"));
-    Assert.assertTrue(headrValues.contains("value4"));
+    Assert.assertEquals(headrValues.size(), 1);
+    Assert.assertTrue(headrValues.contains("value2,value3,value4"));
     Assert.assertEquals(fullHttpResponse.content().array(), str.getBytes());
   }
 
   @Test
   public void testCookieHeader() throws URISyntaxException, IOException {
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("Set-Cookie", "YSxiLGM=, ZCxlLGY=");
     int status = 200;
@@ -74,14 +72,13 @@ public class NettyHttpResponseMapperTest {
     Assert.assertEquals(fullHttpResponse.getStatus().code(), status);
     Assert.assertEquals(fullHttpResponse.headers().get("key1"), "value1");
     List<String> headrValues = fullHttpResponse.headers().getAll("Set-Cookie");
-    Assert.assertEquals(headrValues.size(), 2);
-    Assert.assertTrue(headrValues.contains("a,b,c"));
-    Assert.assertTrue(headrValues.contains("d,e,f"));
+    Assert.assertEquals(headrValues.size(), 1);
+    Assert.assertTrue(headrValues.contains("YSxiLGM=, ZCxlLGY="));
   }
 
   @Test
   public void testNonCookieHeader() throws URISyntaxException, IOException {
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("Not-Set-Cookie", "YSxiLGM=, ZCxlLGY=");
     int status = 200;
@@ -93,9 +90,22 @@ public class NettyHttpResponseMapperTest {
     Assert.assertEquals(fullHttpResponse.getStatus().code(), status);
     Assert.assertEquals(fullHttpResponse.headers().get("key1"), "value1");
     List<String> headrValues = fullHttpResponse.headers().getAll("Not-Set-Cookie");
-    Assert.assertEquals(headrValues.size(), 2);
+    Assert.assertEquals(headrValues.size(), 1);
+    Assert.assertTrue(headrValues.contains("YSxiLGM=, ZCxlLGY="));
+  }
 
-    Assert.assertFalse(headrValues.contains("a,b,c"));
-    Assert.assertFalse(headrValues.contains("d,e,f"));
+  @Test
+  public void testDuplicateHeader() throws IOException {
+    Multimap<String, String> headers = LinkedHashMultimap.create();
+    headers.put("key1", "value1");
+    headers.put("key1", "value2");
+    int status = 200;
+    RecordedHttpResponse recordedHttpResponse = new RecordedHttpResponse(status, headers, null);
+    FullHttpResponse fullHttpResponse = NettyHttpResponseMapper.from(recordedHttpResponse);
+    Assert.assertEquals(fullHttpResponse.getStatus().code(), status);
+    List<String> headrValues = fullHttpResponse.headers().getAll("key1");
+    Assert.assertEquals(headrValues.size(), 2);
+    Assert.assertTrue(headrValues.contains("value1"));
+    Assert.assertTrue(headrValues.contains("value2"));
   }
 }

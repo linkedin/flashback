@@ -5,7 +5,12 @@
 
 package com.linkedin.flashback.matchrules;
 
+import com.google.common.collect.Multimap;
 import com.linkedin.flashback.serializable.RecordedHttpRequest;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -30,8 +35,8 @@ public class MatchHeaders extends BaseMatchRule {
 
   @Override
   public boolean test(RecordedHttpRequest incomingRequest, RecordedHttpRequest expectedRequest) {
-    return _transform.transform(incomingRequest.getHeaders())
-        .equals(_transform.transform(expectedRequest.getHeaders()));
+    return _transform.transform(multimapToCommaSeparatedMap(incomingRequest.getHeaders()))
+        .equals(_transform.transform(multimapToCommaSeparatedMap(expectedRequest.getHeaders())));
   }
 
   public String getMatchFailureDescriptionForRequests(RecordedHttpRequest incomingRequest, RecordedHttpRequest expectedRequest) {
@@ -42,8 +47,17 @@ public class MatchHeaders extends BaseMatchRule {
       resultBuilder.append(" (with Whitelist)");
     }
     resultBuilder.append("%n")
-        .append(String.format("Incoming Headers: %s%n", _transform.transform(incomingRequest.getHeaders())))
-        .append(String.format("Expected Headers: %s%n", _transform.transform(expectedRequest.getHeaders())));
+        .append(String.format("Incoming Headers: %s%n", _transform.transform(multimapToCommaSeparatedMap(incomingRequest.getHeaders()))))
+        .append(String.format("Expected Headers: %s%n", _transform.transform(multimapToCommaSeparatedMap(expectedRequest.getHeaders()))));
     return resultBuilder.toString();
+  }
+
+  private static Map<String,String> multimapToCommaSeparatedMap(Multimap<String, String> multimap) {
+    Map<String, Collection<String>> mapOfCollections = multimap.asMap();
+    HashMap<String, String> map = new HashMap<>();
+    for (Map.Entry<String, Collection<String>> entry : mapOfCollections.entrySet()) {
+      map.put(entry.getKey(), String.join(",", entry.getValue()));
+    }
+    return map;
   }
 }

@@ -6,6 +6,8 @@
 package com.linkedin.flashback.serializable;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.net.HttpHeaders;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,7 +25,7 @@ public class RecordedHttpMessageTest {
   @Test
   public void testGetCharset()
       throws URISyntaxException {
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put(HttpHeaders.CONTENT_TYPE, "text/html; charset=iso-8859-9");
     RecordedHttpRequest recordedHttpRequest = new RecordedHttpRequest("GET", new URI("google.com"), headers, null);
     Assert.assertEquals(recordedHttpRequest.getCharset(), Charset.forName("iso-8859-9").toString());
@@ -32,7 +34,7 @@ public class RecordedHttpMessageTest {
   @Test
   public void testGetCharsetNoContentType()
       throws URISyntaxException {
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     RecordedHttpRequest recordedHttpRequest = new RecordedHttpRequest("GET", new URI("google.com"), headers, null);
     Assert.assertEquals(recordedHttpRequest.getCharset(), Charsets.UTF_8.toString());
   }
@@ -41,13 +43,13 @@ public class RecordedHttpMessageTest {
   public void testPassNullHeaders()
       throws URISyntaxException {
     RecordedHttpRequest recordedHttpRequest = new RecordedHttpRequest("GET", new URI("google.com"), null, null);
-    Assert.assertNull(recordedHttpRequest.getHeaders().get("anykey"));
+    Assert.assertEquals(recordedHttpRequest.getHeaders().get("anykey").size(), 0);
   }
 
   @Test
   public void testGetContentType()
       throws URISyntaxException {
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put(HttpHeaders.CONTENT_TYPE, "text/html");
     RecordedHttpRequest recordedHttpRequest = new RecordedHttpRequest("GET", new URI("google.com"), headers, null);
     Assert.assertEquals(recordedHttpRequest.getContentType(), "text/html");

@@ -5,6 +5,8 @@
 
 package com.linkedin.flashback.matchrules;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.net.HttpHeaders;
 import com.linkedin.flashback.serializable.RecordedHttpRequest;
 import com.linkedin.flashback.serializable.RecordedStringHttpBody;
@@ -71,9 +73,9 @@ public class MatchBodyTest {
       throws Exception {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("造字");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("造字");
-    Map<String, String> headers1 = new HashMap<>();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put(HttpHeaders.CONTENT_TYPE, "text/html; charset=euc-kr");
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put(HttpHeaders.CONTENT_TYPE, "text/html; charset=big5");
 
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers1, stringHttpBody1);

@@ -176,7 +176,8 @@ public class FlashbackRunnerTest {
       request.addHeader("Set-Cookie", "guestidc=0d28bda6-5d42-4ee9-bd1e-asdasda; Domain=asdafsdfasdfasdfa.com; Path=/");
 
       HttpResponse httpResponse0 = client.execute(request);
-      Assert.assertTrue(EntityUtils.toString(httpResponse0.getEntity())
+      String strEnt = EntityUtils.toString(httpResponse0.getEntity());
+      Assert.assertTrue(strEnt
           .contains("I am from Flashback scene, not http://example.org"));
 
     }

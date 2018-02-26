@@ -7,6 +7,8 @@ package com.linkedin.flashback.serializable;
 
 import java.net.URI;
 import java.util.Map;
+
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -19,7 +21,7 @@ public class RecordedHttpRequest extends RecordedHttpMessage {
   private String _httpMethod;
   private URI _uri;
 
-  public RecordedHttpRequest(String httpMethod, URI uri, Map<String, String> headers,
+  public RecordedHttpRequest(String httpMethod, URI uri, Multimap<String, String> headers,
       RecordedHttpBody recordedHttpBody) {
     super(headers, recordedHttpBody);
     _httpMethod = httpMethod;

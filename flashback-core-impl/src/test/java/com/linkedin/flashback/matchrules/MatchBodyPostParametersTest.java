@@ -5,6 +5,8 @@
 
 package com.linkedin.flashback.matchrules;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.linkedin.flashback.serializable.RecordedHttpRequest;
 import com.linkedin.flashback.serializable.RecordedStringHttpBody;
 import java.util.HashMap;
@@ -25,7 +27,7 @@ public class MatchBodyPostParametersTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=b&c=c");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&b=b&c=c");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers, stringHttpBody1);
@@ -40,7 +42,7 @@ public class MatchBodyPostParametersTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=b&c=c");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&c=c&b=b");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers, stringHttpBody1);
@@ -55,7 +57,7 @@ public class MatchBodyPostParametersTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=b&c=c");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&b=b&c=ccc");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers, stringHttpBody1);
@@ -70,7 +72,7 @@ public class MatchBodyPostParametersTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=&c=c&d=");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&b=&c=c&d=");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers, stringHttpBody1);

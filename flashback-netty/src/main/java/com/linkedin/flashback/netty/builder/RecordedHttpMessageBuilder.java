@@ -6,9 +6,7 @@
 package com.linkedin.flashback.netty.builder;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.net.HttpHeaders;
@@ -22,9 +20,7 @@ import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.HttpMessage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Base64;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Iterator;
 
 
 /**
@@ -34,7 +30,6 @@ import java.util.stream.Collectors;
  * @author shfeng
  */
 public abstract class RecordedHttpMessageBuilder {
-  public static final String SET_COOKIE = "Set-Cookie";
   protected HttpMessage _nettyHttpMessage;
   private final Multimap<String, String> _headers = LinkedHashMultimap.create();
   protected final CompositeByteBuf _bodyByteBuf = Unpooled.compositeBuffer();
@@ -69,44 +64,15 @@ public abstract class RecordedHttpMessageBuilder {
       return;
     }
     for (String name : httpMessage.headers().names()) {
-      for (String value : httpMessage.headers().getAll(name)) {
-        if (!_headers.containsEntry(name, value)) {
-          _headers.put(name, value);
-        }
-      }
+      _headers.putAll(name, httpMessage.headers().getAll(name));
     }
   }
 
   /**
    * Convert temporary headers to permanent serializable headers.
    * */
-  Map<String, String> getHeaders() {
-    ImmutableMap.Builder<String, String> builder = ImmutableMap.builder();
-    for (String name : _headers.keySet()) {
-      builder.put(name, getHeader(name));
-    }
-    return builder.build();
-  }
-
-  /**
-   * Util method to convert multi-map entries to single-map entry
-   *
-   * @param name  key in the headers.
-   * @return values that might contain multiple values joined with ','
-   * */
-  protected String getHeader(String name) {
-    // Set-Cookie headers might contains something like "Expires=Thu, 23-Mar-2017 18:01:20 GMT; Path=/"
-    // It's hard to find special character to split them properly. However, we don't want encode other
-    // headers becaus we don't want lose readability in the flashback.scene so let's handle Set-Cookie header
-    // differently
-    if (SET_COOKIE.equals(name)) {
-      return Joiner.on(", ")
-          .join(_headers.get(name)
-              .stream()
-              .map(p -> Base64.getEncoder().encodeToString(p.getBytes()))
-              .collect(Collectors.toList()));
-    }
-    return Joiner.on(", ").join(_headers.get(name));
+  Multimap<String, String> getHeaders() {
+    return _headers;
   }
 
   /**
@@ -114,11 +80,12 @@ public abstract class RecordedHttpMessageBuilder {
    *
    * */
   protected String getContentType() {
-    String header = getHeader(HttpHeaders.CONTENT_TYPE);
-    if (Strings.isNullOrEmpty(header)) {
+    // Content_Type cannot have multiple, commas-separated values, so this is safe.
+    Iterator<String> header = _headers.get(HttpHeaders.CONTENT_TYPE).iterator();
+    if (!header.hasNext()) {
       return DEFAULT_CONTENT_TYPE;
     } else {
-      return MediaType.parse(header).withoutParameters().toString();
+      return MediaType.parse(header.next()).withoutParameters().toString();
     }
   }
 
@@ -127,11 +94,12 @@ public abstract class RecordedHttpMessageBuilder {
    *
    * */
   protected String getContentEncoding() {
-    String header = getHeader(HttpHeaders.CONTENT_ENCODING);
-    if (Strings.isNullOrEmpty(header)) {
+    // Content_Encoding cannot have multiple, commas-separated values, so this is safe.
+    Iterator<String> header = _headers.get(HttpHeaders.CONTENT_ENCODING).iterator();
+    if (!header.hasNext()) {
       return DEFAULT_CONTENT_ENCODING;
     } else {
-      return header;
+      return header.next();
     }
   }
 
@@ -140,11 +108,12 @@ public abstract class RecordedHttpMessageBuilder {
    *
    * */
   protected String getCharset() {
-    String header = getHeader(HttpHeaders.CONTENT_TYPE);
-    if (Strings.isNullOrEmpty(header)) {
+    // Content_Type cannot have multiple, commas-separated values, so this is safe.
+    Iterator<String> header = _headers.get(HttpHeaders.CONTENT_TYPE).iterator();
+    if (!header.hasNext()) {
       return DEFAULT_CHARSET;
     } else {
-      return MediaType.parse(header).charset().or(Charsets.UTF_8).toString();
+      return MediaType.parse(header.next()).charset().or(Charsets.UTF_8).toString();
     }
   }
 

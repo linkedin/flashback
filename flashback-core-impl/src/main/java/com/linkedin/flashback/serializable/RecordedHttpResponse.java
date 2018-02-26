@@ -6,6 +6,8 @@
 package com.linkedin.flashback.serializable;
 
 import java.util.Map;
+
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -17,7 +19,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public class RecordedHttpResponse extends RecordedHttpMessage {
   private int _status;
 
-  public RecordedHttpResponse(int status, Map<String, String> headers, RecordedHttpBody recordedHttpBody) {
+  public RecordedHttpResponse(int status, Multimap<String, String> headers, RecordedHttpBody recordedHttpBody) {
     super(headers, recordedHttpBody);
     _status = status;
   }

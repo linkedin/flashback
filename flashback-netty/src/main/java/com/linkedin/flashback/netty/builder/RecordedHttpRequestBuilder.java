@@ -41,7 +41,7 @@ public class RecordedHttpRequestBuilder extends RecordedHttpMessageBuilder {
       if (uri.isAbsolute()) {
         _uri = uri;
       } else {
-        String hostName = getHeader(HttpHeaders.Names.HOST);
+        String hostName = nettyHttpRequest.headers().get(HttpHeaders.Names.HOST);
         if (!Strings.isNullOrEmpty(hostName)) {
           _uri = new URI(String.format("https://%s%s", hostName, uri));
         } else {
@@ -64,7 +64,7 @@ public class RecordedHttpRequestBuilder extends RecordedHttpMessageBuilder {
   public void addHeaders(HttpMessage httpMessage) {
     super.addHeaders(httpMessage);
     if (_uri == null) {
-      String hostName = getHeader(HttpHeaders.Names.HOST);
+      String hostName = httpMessage.headers().get(HttpHeaders.Names.HOST);
       if (!Strings.isNullOrEmpty(hostName)) {
         try {
           _uri = new URI(String.format("https://%s%s", hostName, _path));

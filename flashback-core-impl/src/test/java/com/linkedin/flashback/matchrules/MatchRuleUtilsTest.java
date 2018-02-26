@@ -5,6 +5,8 @@
 
 package com.linkedin.flashback.matchrules;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import com.linkedin.flashback.serializable.RecordedHttpBody;
 import com.linkedin.flashback.serializable.RecordedHttpRequest;
 import com.linkedin.flashback.serializable.RecordedStringHttpBody;
@@ -26,7 +28,7 @@ public class MatchRuleUtilsTest {
   public void testEntireRequestMatch()
       throws Exception {
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("key2", "value2");
 
@@ -47,7 +49,7 @@ public class MatchRuleUtilsTest {
   public void testEntireRequestMatchNoBody()
       throws Exception {
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("key2", "value2");
 
@@ -67,7 +69,7 @@ public class MatchRuleUtilsTest {
   public void testDifferentMethods()
       throws Exception {
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("key2", "value2");
 
@@ -90,11 +92,11 @@ public class MatchRuleUtilsTest {
   public void testDifferentHeaders()
       throws Exception {
 
-    Map<String, String> headers1 = new HashMap<>();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put("key1", "value1");
     headers1.put("key2", "value2");
 
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put("key1", "value1");
     headers2.put("key3", "value3");
 
@@ -115,7 +117,7 @@ public class MatchRuleUtilsTest {
   public void testDifferentURIs()
       throws Exception {
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("key2", "value2");
 
@@ -137,7 +139,7 @@ public class MatchRuleUtilsTest {
   public void testDifferentBody()
       throws Exception {
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("key1", "value1");
     headers.put("key2", "value2");
 
@@ -159,12 +161,12 @@ public class MatchRuleUtilsTest {
   @Test
   public void testHeaderWhitelistMatch()
       throws Exception {
-    Map<String, String> headers1 = new HashMap<>();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put("key1", "value1");
     headers1.put("key2", "value2");
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers1, null);
 
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put("key1", "value1");
     headers2.put("key2", "value2");
     headers2.put("key3", "value3");
@@ -182,11 +184,11 @@ public class MatchRuleUtilsTest {
   @Test
   public void testHeaderWhitelistMatchWithNoneInWL()
       throws Exception {
-    Map<String, String> headers1 = new HashMap();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put("key3", "value3");
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers1, null);
 
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put("key2", "value2");
     headers2.put("key3", "value3");
     RecordedHttpRequest recordedHttpRequest2 = new RecordedHttpRequest(null, null, headers2, null);
@@ -202,12 +204,12 @@ public class MatchRuleUtilsTest {
   @Test
   public void testHeaderWhitelistNotMatchWithOneHeaderNull()
       throws Exception {
-    Map<String, String> headers1 = new HashMap<>();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put("key1", "value1");
     headers1.put("key3", "value3");
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers1, null);
 
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put("key2", "value2");
     headers2.put("key3", "value3");
     RecordedHttpRequest recordedHttpRequest2 = new RecordedHttpRequest(null, null, headers2, null);
@@ -224,12 +226,12 @@ public class MatchRuleUtilsTest {
   @Test
   public void testHeaderBlacklistMatch()
       throws Exception {
-    Map<String, String> headers1 = new HashMap<>();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put("key2", "value2");
     headers1.put("key3", "value3");
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers1, null);
 
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put("key1", "value1");
     headers2.put("key2", "value2");
     headers2.put("key3", "value3");
@@ -246,12 +248,12 @@ public class MatchRuleUtilsTest {
   @Test
   public void testHeaderBlacklistMatchEmptyBL()
       throws Exception {
-    Map<String, String> headers1 = new HashMap<>();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put("key1", "value1");
     headers1.put("key2", "value2");
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers1, null);
 
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put("key1", "value1");
     headers2.put("key2", "value2");
     RecordedHttpRequest recordedHttpRequest2 = new RecordedHttpRequest(null, null, headers2, null);
@@ -264,12 +266,12 @@ public class MatchRuleUtilsTest {
 
   @Test
   public void testHeaderBlacklistMatchNullBL() {
-    Map<String, String> headers1 = new HashMap<>();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put("key1", "value1");
     headers1.put("key2", "value2");
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers1, null);
 
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put("key1", "value1");
     headers2.put("key2", "value2");
     RecordedHttpRequest recordedHttpRequest2 = new RecordedHttpRequest(null, null, headers2, null);
@@ -282,12 +284,12 @@ public class MatchRuleUtilsTest {
   @Test
   public void testHeaderBlacklistNotMatchBL()
       throws Exception {
-    Map<String, String> headers1 = new HashMap<>();
+    Multimap<String, String> headers1 = LinkedHashMultimap.create();
     headers1.put("key1", "value1");
     headers1.put("key2", "value2");
     RecordedHttpRequest recordedHttpRequest1 = new RecordedHttpRequest(null, null, headers1, null);
 
-    Map<String, String> headers2 = new HashMap<>();
+    Multimap<String, String> headers2 = LinkedHashMultimap.create();
     headers2.put("key1", "value1");
     headers2.put("key2", "value2");
     headers2.put("key3", "value3");
@@ -307,7 +309,7 @@ public class MatchRuleUtilsTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=b&c=c");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&b=x&c=c&d=d");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     Set<String> whitelist = new HashSet<>();
@@ -326,7 +328,7 @@ public class MatchRuleUtilsTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=b&c=c&e=");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&b=x&c=c&d=d&e=");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     Set<String> whitelist = new HashSet<>();
@@ -346,7 +348,7 @@ public class MatchRuleUtilsTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=b&c=c");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&b=x&c=c");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     Set<String> whitelist = new HashSet<>();
@@ -366,7 +368,7 @@ public class MatchRuleUtilsTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=b&c=c");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&b=x&c=c&d=d");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     Set<String> blackList = new HashSet<>();
@@ -385,7 +387,7 @@ public class MatchRuleUtilsTest {
     RecordedStringHttpBody stringHttpBody1 = new RecordedStringHttpBody("a=a&b=b&c=c");
     RecordedStringHttpBody stringHttpBody2 = new RecordedStringHttpBody("a=a&b=x&c=c");
 
-    Map<String, String> headers = new HashMap<>();
+    Multimap<String, String> headers = LinkedHashMultimap.create();
     headers.put("Content-Type", "application/x-www-form-urlencoded");
 
     Set<String> blackList = new HashSet<>();
