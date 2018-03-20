@@ -15,7 +15,8 @@ package com.linkedin.flashback.matchrules;
 public enum NamedMatchRule {
   MATCH_ENTIRE_REQUEST("matchEntireRequest"),
   MATCH_METHOD_URI("matchMethodUri"),
-  MATCH_METHOD_BODY_URI("matchMethodBodyUri");
+  MATCH_METHOD_BODY_URI("matchMethodBodyUri"),
+  MATCH_METHOD_URI_BODY_WITHOUT_BOUNDARY("matchMethodUriBodyWithAnyBoundary");
   private final String _text;
 
   NamedMatchRule(String text) {
@@ -31,6 +32,9 @@ public enum NamedMatchRule {
     }
     if (MATCH_METHOD_BODY_URI._text.equalsIgnoreCase(predefinedMatchRule)) {
       return MatchRuleUtils.matchMethodBodyUri();
+    }
+    if (MATCH_METHOD_URI_BODY_WITHOUT_BOUNDARY._text.equalsIgnoreCase(predefinedMatchRule)) {
+      return MatchRuleUtils.matchMethodUriBodyWithAnyBoundary();
     }
     return null;
   }

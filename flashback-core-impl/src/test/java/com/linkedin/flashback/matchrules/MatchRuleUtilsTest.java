@@ -522,4 +522,96 @@ public class MatchRuleUtilsTest {
     Assert.assertFalse(matchRule.test(recordedHttpRequest1, recordedHttpRequest2));
     Assert.assertTrue(matchRule.getMatchFailureDescriptionForRequests(recordedHttpRequest1, recordedHttpRequest2).contains("URI Mismatch (with Query Blacklist)"));
   }
+
+  @Test
+  public void testMethodUriBodyWithAnyBoundaryMatch()
+      throws Exception {
+    Multimap<String, String> headers = LinkedHashMultimap.create();
+    headers.put("key1", "value1");
+    headers.put("Content-Type", "multipart/form-data; boundary=wxyz1234abcd5e");
+
+    RecordedHttpBody body = new RecordedStringHttpBody("------wxyz1234abcd5e\nContent-Disposition: form-data; name=\"org\" \ngoogle\n------wxyz1234abcd5e");
+    RecordedHttpRequest recordedHttpRequest1 =
+        new RecordedHttpRequest("POST", new URI("http://www.google.com/"), headers, body);
+    RecordedHttpRequest recordedHttpRequest2 =
+        new RecordedHttpRequest("POST", new URI("http://www.google.com/"), headers, body);
+
+    MatchRule matchRule = MatchRuleUtils.matchMethodUriBodyWithAnyBoundary();
+    Assert.assertTrue(matchRule.test(recordedHttpRequest1, recordedHttpRequest2));
+  }
+
+  @Test
+  public void testMethodUriBodyWithAnyBoundaryMatchForNoBody()
+      throws Exception {
+    Multimap<String, String> headers = LinkedHashMultimap.create();
+    headers.put("key1", "value1");
+    headers.put("Content-Type", "multipart/form-data; boundary=wxyz1234abcd5e");
+
+    RecordedHttpRequest recordedHttpRequest1 =
+        new RecordedHttpRequest("POST", new URI("http://www.google.com/"), headers, null);
+    RecordedHttpRequest recordedHttpRequest2 =
+        new RecordedHttpRequest("POST", new URI("http://www.google.com/"), headers, null);
+
+    MatchRule matchRule = MatchRuleUtils.matchMethodUriBodyWithAnyBoundary();
+    Assert.assertTrue(matchRule.test(recordedHttpRequest1, recordedHttpRequest2));
+  }
+
+  @Test
+  public void testMethodUriBodyWithAnyBoundaryMatchForDifferentMethods()
+      throws Exception {
+    Multimap<String, String> headers = LinkedHashMultimap.create();
+    headers.put("key1", "value1");
+    headers.put("Content-Type", "multipart/form-data; boundary=wxyz1234abcd5e");
+
+    RecordedHttpBody body = new RecordedStringHttpBody("------wxyz1234abcd5e\nContent-Disposition: form-data; name=\"org\" \ngoogle\n------wxyz1234abcd5e");
+    RecordedHttpRequest recordedHttpRequest1 =
+        new RecordedHttpRequest("POST", new URI("http://www.google.com/"), headers, body);
+    RecordedHttpRequest recordedHttpRequest2 =
+        new RecordedHttpRequest("PUT", new URI("http://www.google.com/"), headers, body);
+
+    MatchRule matchRule = MatchRuleUtils.matchMethodUriBodyWithAnyBoundary();
+
+    Assert.assertFalse(matchRule.test(recordedHttpRequest1, recordedHttpRequest2));
+    Assert.assertTrue(matchRule.getMatchFailureDescriptionForRequests(recordedHttpRequest1, recordedHttpRequest2).contains("HTTP Method Mismatch"));
+  }
+
+  @Test
+  public void testMethodUriBodyWithAnyBoundaryMatchForDifferentUri()
+      throws Exception {
+    Multimap<String, String> headers = LinkedHashMultimap.create();
+    headers.put("key1", "value1");
+    headers.put("Content-Type", "multipart/form-data; boundary=wxyz1234abcd5e");
+
+    RecordedHttpBody body = new RecordedStringHttpBody("------wxyz1234abcd5e\nContent-Disposition: form-data; name=\"org\" \ngoogle\n------wxyz1234abcd5e");
+    RecordedHttpRequest recordedHttpRequest1 =
+        new RecordedHttpRequest("POST", new URI("http://www.linkedin.com/"), headers, body);
+    RecordedHttpRequest recordedHttpRequest2 =
+        new RecordedHttpRequest("POST", new URI("http://www.google.com/"), headers, body);
+
+    MatchRule matchRule = MatchRuleUtils.matchMethodUriBodyWithAnyBoundary();
+
+    Assert.assertFalse(matchRule.test(recordedHttpRequest1, recordedHttpRequest2));
+    Assert.assertTrue(matchRule.getMatchFailureDescriptionForRequests(recordedHttpRequest1, recordedHttpRequest2).contains("URI Mismatch"));
+  }
+
+  @Test
+  public void testMethodUriBodyWithAnyBoundaryMatchForDifferentBody()
+      throws Exception {
+    Multimap<String, String> headers = LinkedHashMultimap.create();
+    headers.put("Content-Type", "multipart/form-data; boundary=wxyz1234abcd5e");
+
+    RecordedHttpBody body1 = new RecordedStringHttpBody("------wxyz1234abcd5e\nContent-Disposition: form-data; "
+        + "name=\"org\" \ngoogle\n------wxyz1234abcd5e");
+    RecordedHttpBody body2 = new RecordedStringHttpBody("------wxyz1234abcd5e\nContent-Disposition: form-data; "
+        + "name=\"org\" \ndifferent google\n------wxyz1234abcd5e");
+    RecordedHttpRequest recordedHttpRequest1 =
+        new RecordedHttpRequest("POST", new URI("http://www.google.com/"), headers, body1);
+    RecordedHttpRequest recordedHttpRequest2 =
+        new RecordedHttpRequest("POST", new URI("http://www.google.com/"), headers, body2);
+
+    MatchRule matchRule = MatchRuleUtils.matchMethodUriBodyWithAnyBoundary();
+
+    Assert.assertFalse(matchRule.test(recordedHttpRequest1, recordedHttpRequest2));
+    Assert.assertTrue(matchRule.getMatchFailureDescriptionForRequests(recordedHttpRequest1, recordedHttpRequest2).contains("HTTP Body Mismatch"));
+  }
 }

@@ -51,6 +51,17 @@ public final class MatchRuleUtils {
   }
 
   /**
+   * @return rule to match request Method, URI and Body with any boundary
+   */
+  public static MatchRule matchMethodUriBodyWithAnyBoundary() {
+    CompositeMatchRule compositeMatchRule = new CompositeMatchRule();
+    compositeMatchRule.addRule(new MatchMethod());
+    compositeMatchRule.addRule(new MatchUri());
+    compositeMatchRule.addRule(new MatchBodyWithAnyBoundary());
+    return compositeMatchRule;
+  }
+
+  /**
    * @return rule to match request URI, whitelisting the specified query parameters
    */
   public static MatchRule matchUriWithQueryWhitelist(Set<String> whiteList) {
