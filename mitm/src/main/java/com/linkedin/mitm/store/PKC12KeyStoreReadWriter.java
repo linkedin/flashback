@@ -30,11 +30,8 @@ public class PKC12KeyStoreReadWriter implements KeyStoreReader, KeyStoreWriter {
   public KeyStore load(InputStream inputstream, String password)
       throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
     KeyStore ksKeys = KeyStore.getInstance(KEY_STORE_TYPE);
-    try {
-      ksKeys.load(inputstream, password.toCharArray());
-    } finally {
-      inputstream.close();
-    }
+    ksKeys.load(inputstream, password.toCharArray());
+
     return ksKeys;
   }
 

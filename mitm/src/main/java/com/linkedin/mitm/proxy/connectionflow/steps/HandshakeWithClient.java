@@ -22,6 +22,7 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.net.ssl.SSLContext;
 import org.apache.log4j.Logger;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -38,6 +39,8 @@ public class HandshakeWithClient implements ConnectionFlowStep {
   private final CertificateKeyStoreFactory _certificateKeyStoreFactory;
   private final CertificateAuthority _certificateAuthority;
 
+  private final ConcurrentHashMap<String, SSLContext> _sslContextCache = new ConcurrentHashMap<>();
+
   public HandshakeWithClient(CertificateKeyStoreFactory certificateKeyStoreFactory,
       CertificateAuthority certificateAuthority) {
     _certificateKeyStoreFactory = certificateKeyStoreFactory;
@@ -46,18 +49,21 @@ public class HandshakeWithClient implements ConnectionFlowStep {
 
   @Override
   public Future execute(ChannelMediator channelMediator, InetSocketAddress remoteAddress) {
-
     //dynamically create SSLEngine based on CN and SANs
-    LOG.debug("Starting client to proxy connection handshaking");
-    try {
-      //TODO: if connect request only contains ip address, we need get either CA
-      //TODO: or SANS from server response
-      KeyStore keyStore = _certificateKeyStoreFactory.create(remoteAddress.getHostName(), new ArrayList<>());
-      SSLContext sslContext = SSLContextGenerator.createClientContext(keyStore, _certificateAuthority.getPassPhrase());
-      return channelMediator.handshakeWithClient(sslContext.createSSLEngine());
-    } catch (NoSuchAlgorithmException | KeyStoreException | IOException | CertificateException | OperatorCreationException
-        | NoSuchProviderException | InvalidKeyException | SignatureException | KeyManagementException | UnrecoverableKeyException e) {
-      throw new RuntimeException("Failed to create server identity certificate", e);
-    }
+    LOG.debug("Starting client connection handshaking");
+
+    //TODO: if connect request only contains ip address, we need get either CA
+    //TODO: or SANS from server response
+    String remoteHost = remoteAddress.getHostName();
+    SSLContext sslContext = _sslContextCache.computeIfAbsent(remoteHost, key -> {
+      try {
+        KeyStore keyStore = _certificateKeyStoreFactory.create(remoteHost, new ArrayList<>());
+        return SSLContextGenerator.createClientContext(keyStore, _certificateAuthority.getPassPhrase());
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to create server identity certificate for " + remoteHost, e);
+      }
+    });
+    return channelMediator.handshakeWithClient(sslContext.createSSLEngine());
   }
+
 }

@@ -21,6 +21,7 @@ import com.linkedin.mitm.proxy.factory.ConnectionFlowFactory;
 import io.netty.handler.codec.http.HttpRequest;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import org.apache.log4j.Logger;
@@ -173,6 +174,13 @@ public class FlashbackRunner implements AutoCloseable {
               builder._certificateAuthority);
       proxyServerBuilder.connectionFlow(Protocol.HTTPS, httpsConnectionFlow);
     }
+
+    try {
+      builder._rootCertificateInputStream.close();
+    } catch (IOException e) {
+      LOG.error("Failed to close root certificate input stream", e);
+    }
+
     return proxyServerBuilder.build();
   }
 

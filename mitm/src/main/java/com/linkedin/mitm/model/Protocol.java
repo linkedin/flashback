@@ -11,5 +11,5 @@ package com.linkedin.mitm.model;
  * @author shfeng
  */
 public enum Protocol {
-  HTTP, HTTPS
+  HTTP, HTTPS, BINARY
 }

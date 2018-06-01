@@ -5,13 +5,14 @@
 
 package com.linkedin.mitm.services;
 
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -25,30 +26,58 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class SSLContextGenerator {
   private static final String SSL_CONTEXT_PROTOCOL = "TLS";
-  private static final String KEY_MANAGER_TYPE = "SunX509";
   private static final String TRUST_MANAGER_TYPE = "SunX509";
+  private static final String KEY_STORE_TYPE = "JKS";
+  private static final String CA_STORE = "/etc/riddler/cacerts";
+  private static final String CA_PASSWORD = "changeit";
 
   /**
-   * Create client side SSLContext {@link javax.net.ssl.SSLContext}
-   *
-   * */
-  public static SSLContext createClientContext(KeyStore keyStore, char[] passphrase)
-      throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+   * Create SSLContext for ssl traffic between client and proxy {@link javax.net.ssl.SSLContext}
+   **/
+  public static SSLContext createClientContext(KeyStore keyStore, char[] passphrase) throws Exception {
+    TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TRUST_MANAGER_TYPE);
+    trustManagerFactory.init(keyStore);
     String keyManAlg = KeyManagerFactory.getDefaultAlgorithm();
     KeyManagerFactory kmf = KeyManagerFactory.getInstance(keyManAlg);
     kmf.init(keyStore, passphrase);
     KeyManager[] keyManagers = kmf.getKeyManagers();
-    return create(keyManagers, InsecureTrustManagerFactory.INSTANCE.getTrustManagers(),
+
+    // set up trust manager factory to use riddler trust store
+    TrustManagerFactory
+        tmf = TrustManagerFactoryGenerator.newTrustManagerFactory(CA_STORE, CA_PASSWORD.toCharArray(), KEY_STORE_TYPE);
+
+    TrustManager[] trustManagers = tmf.getTrustManagers();
+
+    return create(keyManagers, trustManagers,
         RandomNumberGenerator.getInstance().getSecureRandom());
   }
 
   /**
-   * Create default server side SSLContext {@link javax.net.ssl.SSLContext}
-   *
-   * */
-  public static SSLContext createDefaultServerContext()
-      throws KeyManagementException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException {
+   * Create SSLContext for ssl traffic between proxy and destination server {@link javax.net.ssl.SSLContext}
+   **/
+  public static SSLContext createDefaultServerContext() throws KeyManagementException, NoSuchAlgorithmException {
     return create(null, null, RandomNumberGenerator.getInstance().getSecureRandom());
+  }
+
+  /**
+   * Create SSLContext for ssl traffic between proxy and destination server {@link javax.net.ssl.SSLContext}
+   **/
+  public static SSLContext createCustomServerContext(InputStream inputStream, String password)
+      throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+    KeyStore keyStore = KeyStore.getInstance("JKS");
+
+    // load default Riddler keystore
+    try {
+      keyStore.load(inputStream, password.toCharArray());
+
+      TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+      tmf.init(keyStore);
+
+      return create(null, tmf.getTrustManagers(), RandomNumberGenerator.getInstance().getSecureRandom());
+    } catch (IOException | CertificateException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
 
   private static SSLContext create(KeyManager[] keyManagers, TrustManager[] trustManagers, SecureRandom secureRandom)
