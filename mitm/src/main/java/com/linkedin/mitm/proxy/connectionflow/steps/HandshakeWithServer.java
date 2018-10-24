@@ -28,6 +28,6 @@ public class HandshakeWithServer implements ConnectionFlowStep {
   @Override
   public Future execute(ChannelMediator channelMediator, InetSocketAddress remoteAddress) {
     LOG.debug("Starting proxy to server connection handshaking");
-    return channelMediator.handshakeWithServer(_sslContext.createSSLEngine());
+    return channelMediator.handshakeWithServer(_sslContext.createSSLEngine(remoteAddress.getHostName(), 443));
   }
 }
