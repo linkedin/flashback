@@ -1,31 +1,25 @@
 if (project.hasProperty('overrideBuildEnvironment')) {
-  //The property is automatically passed to the Gradle build when the project is built at LinkedIn
-  //The property contains the file path to a script plugin that 'adapts' this OS project to LinkedIn
-  //In order to adapt the project, we need to apply this script plugin:
+  // Otherwise, assume overrideBuildEnvironment defines a path to a file, and apply it.
   apply from: project.overrideBuildEnvironment
 }
 
 task wrapper(type: Wrapper) {
-  gradleVersion = '2.13'
+  gradleVersion = '6.4'
 }
-
-
 
 buildscript {
   repositories {
     mavenCentral()
     mavenLocal()
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
   }
 }
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
-
-
-buildscript {
-  repositories {
-    mavenCentral()
-    mavenLocal()
-  }
-}
 
 ext {
   libs = [:]
@@ -49,7 +43,12 @@ libs += [
 ]
 
 allprojects {
-  apply plugin: "java"
+  version='0.0.5'
+  group='com.linkedin.flashback'
+
+  apply plugin: 'maven'
+  apply plugin: 'maven-publish'
+  apply plugin: 'java'
   apply plugin: 'idea'
 
   dependencies {
@@ -126,3 +125,76 @@ project(':flashback-admin') {
   }
 }
 
+project(':flashback-all') {
+  dependencies {
+    // this is a meta project that depends on all of the "entry-point" subprojects to make it easier to pull in the
+    // entire dependency tree.
+    compile project(':flashback-core-impl')
+    compile project(':mitm')
+    compile project(':flashback-test-util')
+    compile project(':flashback-smartproxy')
+    compile project(':flashback-netty')
+    compile project(':flashback-admin')
+  }
+}
+
+
+tasks.withType(Jar) {
+  from "$rootDir/LICENSE"
+  from "$rootDir/NOTICE"
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+def pomConfig = {
+  licenses {
+    license {
+      name "2-CLAUSE BSD"
+      url "https://github.com/linkedin/flashback/blob/master/LICENSE"
+      distribution "repo"
+    }
+  }
+
+  scm {
+    url 'https://github.com/linkedin/flashback.git'
+
+  }
+}
+
+
+publishing {
+  publications {
+    MyPublication(MavenPublication) {
+      from components.java
+      artifact javadocJar
+      artifact sourcesJar
+
+      pom.withXml {
+        def root = asNode()
+        root.appendNode('name', 'flashback')
+        root.children().last() + pomConfig
+      }
+    }
+  }
+}
+
+bintray {
+  user = System.getenv('BINTRAY_USER')
+  key = System.getenv('BINTRAY_API_KEY')
+  publications = ['MyPublication']
+  pkg {
+    repo = 'maven'
+    userOrg = 'linkedin'
+    name = 'flashback'
+
+    vcsUrl = 'https://github.com/linkedin/flashback.git'
+  }
+}
