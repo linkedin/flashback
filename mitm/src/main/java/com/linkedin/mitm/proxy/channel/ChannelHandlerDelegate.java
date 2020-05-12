@@ -10,7 +10,7 @@ import io.netty.handler.codec.http.HttpObject;
 
 /**
  * Interface to create Handler delegate which will
- * be used by {@Link ClientChannelHandler}
+ * be used by {@link ClientChannelHandler}
  *
  * @author shfeng .
  */

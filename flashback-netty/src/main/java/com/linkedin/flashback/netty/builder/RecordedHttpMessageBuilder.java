@@ -118,7 +118,7 @@ public abstract class RecordedHttpMessageBuilder {
   }
 
   /**
-   * Build serializable {@Link RecordedHttpBody} using temporary byte buffers.
+   * Build serializable {@link RecordedHttpBody} using temporary byte buffers.
    * Based on Charset, we will build concrete Http body either binary or characters.
    * TODO: throw customized exception if failed to create http body
    *

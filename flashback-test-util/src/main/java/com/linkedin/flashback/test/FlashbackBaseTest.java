@@ -72,7 +72,7 @@ public class FlashbackBaseTest {
   }
 
   /**
-   * this is the place to override and change the default scene & matchrule on each test class.
+   * this is the place to override and change the default scene &amp; matchrule on each test class.
    *
    * @throws IOException
    */
@@ -291,7 +291,7 @@ public class FlashbackBaseTest {
       _defaultScene = SceneFactory.create(sceneConfiguration);
     }
 
-    // after determined the default Scene&MatchRule for this test class, set them.
+    // after determined the default Scene &amp; MatchRule for this test class, set them.
     _flashbackRunner.setScene(_defaultScene);
     _flashbackRunner.setMatchRule(_defaultMatchRule);
   }

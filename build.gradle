@@ -2,11 +2,9 @@ if (project.hasProperty('overrideBuildEnvironment')) {
   // Otherwise, assume overrideBuildEnvironment defines a path to a file, and apply it.
   apply from: project.overrideBuildEnvironment
 }
-
 task wrapper(type: Wrapper) {
   gradleVersion = '6.4'
 }
-
 buildscript {
   repositories {
     mavenCentral()
@@ -17,14 +15,9 @@ buildscript {
     classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
   }
 }
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
-
-
 ext {
   libs = [:]
 }
-
 libs += [
     apache: "org.apache.commons:commons-lang3:3.4",
     apacheCommonsIo: "commons-io:commons-io:2.4",
@@ -41,13 +34,13 @@ libs += [
     restliServer: "com.linkedin.pegasus:restli-server:6.0.12",
     restliNettyStandalone: "com.linkedin.pegasus:restli-netty-standalone:6.0.12"
 ]
-
-allprojects {
+apply plugin: 'idea'
+subprojects {
   version='0.0.5'
   group='com.linkedin.flashback'
 
-  apply plugin: 'maven'
   apply plugin: 'maven-publish'
+  apply plugin: 'com.jfrog.bintray'
   apply plugin: 'java'
   apply plugin: 'idea'
 
@@ -64,21 +57,50 @@ allprojects {
     compile libs.log4j
     compile libs.netty
     testCompile libs.testng
-
   }
-
   repositories {
     mavenCentral()
   }
-
   test {
     useTestNG()
+  }
+  tasks.withType(Jar) {
+    from "$rootDir/LICENSE"
+    from "$rootDir/NOTICE"
+  }
+  task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+  }
+  task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+  }
+
+  publishing {
+    publications {
+      MyPublication(MavenPublication) {
+        from components.java
+        artifact javadocJar
+        artifact sourcesJar
+      }
+    }
+  }
+  bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_API_KEY')
+    publications = ['MyPublication']
+    pkg {
+      repo = 'maven'
+      userOrg = 'linkedin'
+      name = 'flashback'
+      vcsUrl = 'https://github.com/linkedin/flashback.git'
+    }
   }
 }
 
 project(':flashback-test-util') {
   println "Building project 'test-util'"
-
   dependencies {
     compile project(':flashback-core-impl')
     compile project(':flashback-smartproxy')
@@ -86,34 +108,26 @@ project(':flashback-test-util') {
     compile libs.testng
   }
 }
-
 project(':flashback-smartproxy') {
   println "Building project 'smartproxy'"
-
   dependencies {
     compile project(':flashback-core-impl')
     compile project(':flashback-netty')
     compile project(':mitm')
   }
 }
-
 project(':flashback-netty') {
   println "Building project 'netty'"
-
   dependencies {
     compile project(':flashback-core-impl')
   }
 }
-
 project(':flashback-admin') {
-  apply plugin: 'java'
-
   dependencies {
     compile libs.restliServer
     compile libs.restliNettyStandalone
     compile project(':flashback-smartproxy')
   }
-
   task startAdminServer(type: JavaExec) {
     main = 'com.linkedin.restli.server.NettyStandaloneLauncher'
     if (project.hasProperty('Args')) {
@@ -124,7 +138,6 @@ project(':flashback-admin') {
     standardInput = System.in
   }
 }
-
 project(':flashback-all') {
   dependencies {
     // this is a meta project that depends on all of the "entry-point" subprojects to make it easier to pull in the
@@ -135,66 +148,5 @@ project(':flashback-all') {
     compile project(':flashback-smartproxy')
     compile project(':flashback-netty')
     compile project(':flashback-admin')
-  }
-}
-
-
-tasks.withType(Jar) {
-  from "$rootDir/LICENSE"
-  from "$rootDir/NOTICE"
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-  classifier = 'sources'
-  from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-  classifier = 'javadoc'
-  from javadoc.destinationDir
-}
-
-def pomConfig = {
-  licenses {
-    license {
-      name "2-CLAUSE BSD"
-      url "https://github.com/linkedin/flashback/blob/master/LICENSE"
-      distribution "repo"
-    }
-  }
-
-  scm {
-    url 'https://github.com/linkedin/flashback.git'
-
-  }
-}
-
-
-publishing {
-  publications {
-    MyPublication(MavenPublication) {
-      from components.java
-      artifact javadocJar
-      artifact sourcesJar
-
-      pom.withXml {
-        def root = asNode()
-        root.appendNode('name', 'flashback')
-        root.children().last() + pomConfig
-      }
-    }
-  }
-}
-
-bintray {
-  user = System.getenv('BINTRAY_USER')
-  key = System.getenv('BINTRAY_API_KEY')
-  publications = ['MyPublication']
-  pkg {
-    repo = 'maven'
-    userOrg = 'linkedin'
-    name = 'flashback'
-
-    vcsUrl = 'https://github.com/linkedin/flashback.git'
   }
 }
