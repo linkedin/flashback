@@ -2,9 +2,6 @@ if (project.hasProperty('overrideBuildEnvironment')) {
   // Otherwise, assume overrideBuildEnvironment defines a path to a file, and apply it.
   apply from: project.overrideBuildEnvironment
 }
-task wrapper(type: Wrapper) {
-  gradleVersion = '6.4'
-}
 buildscript {
   repositories {
     mavenCentral()
@@ -36,7 +33,7 @@ libs += [
 ]
 apply plugin: 'idea'
 subprojects {
-  version='0.0.5'
+  version='0.0.6'
   group='com.linkedin.flashback'
 
   apply plugin: 'maven-publish'
