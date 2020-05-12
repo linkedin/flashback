@@ -64,7 +64,7 @@ public final class HttpUtilities {
 
   /**
    * Converts a URL / POST parameter string to an ordered map of key / value pairs
-   * @param paramsString the URL-encoded &-delimited string of key / value pairs
+   * @param paramsString the URL-encoded '&amp;' delimited string of key / value pairs
    * @return a LinkedHashMap representing the decoded parameters
    */
   static public Map<String, String> stringToUrlParams(String paramsString, String charset)
@@ -87,7 +87,7 @@ public final class HttpUtilities {
   /**
    * Converts an ordered map of key / value pairs to a URL parameter string
    * @param params the map of key / value pairs
-   * @return a string representation of the key / value pairs, delimited by '&'
+   * @return a string representation of the key / value pairs, delimited by '&amp;'
    */
   static public String urlParamsToString(Map<String, String> params, String charset)
       throws UnsupportedEncodingException {

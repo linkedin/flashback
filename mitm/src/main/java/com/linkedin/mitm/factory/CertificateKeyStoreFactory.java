@@ -25,7 +25,7 @@ import org.bouncycastle.operator.OperatorCreationException;
 
 
 /**
- *  This factory would be used to generate {@Link KeyStore} either from CA certificate
+ *  This factory would be used to generate {@link KeyStore} either from CA certificate
  *  or server identity certificates
  *  It will be only used to generate keyManagers not trustManagers.
  *
