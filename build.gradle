@@ -33,13 +33,12 @@ libs += [
 ]
 apply plugin: 'idea'
 subprojects {
-  version='0.0.6'
+  version='0.0.10'
   group='com.linkedin.flashback'
 
   apply plugin: 'maven-publish'
   apply plugin: 'com.jfrog.bintray'
   apply plugin: 'java'
-  apply plugin: 'idea'
 
   dependencies {
     compile libs.apache
@@ -74,12 +73,32 @@ subprojects {
     from javadoc.destinationDir
   }
 
+  def pomConfig = {
+    licenses {
+      license {
+        name "2-CLAUSE BSD"
+        url "https://github.com/linkedin/flashback/blob/master/LICENSE"
+        distribution "repo"
+      }
+    }
+    scm {
+      url "https://github.com/linkedin/flashback.git"
+    }
+  }
+
   publishing {
     publications {
       MyPublication(MavenPublication) {
         from components.java
         artifact javadocJar
         artifact sourcesJar
+
+        pom.withXml {
+          def root = asNode()
+          root.appendNode('description', 'Mock the internet')
+          root.appendNode('name', 'flashback')
+          root.children().last() + pomConfig
+        }
       }
     }
   }
