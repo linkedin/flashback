@@ -58,8 +58,7 @@ public class FlashbackBaseTest {
    * this is the place to override and do anything that you think should be done before the flashback is brought up like change proxy config (a new port).
    */
   @BeforeTest
-  protected void flashbackGlobalSetUp()
-      throws FileNotFoundException, InterruptedException {
+  protected void flashbackGlobalSetUp() throws Exception {
     bootstrap();
   }
 
